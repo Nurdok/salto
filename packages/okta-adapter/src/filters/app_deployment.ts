@@ -33,7 +33,13 @@ import {
   isObjectType,
   CORE_ANNOTATIONS,
 } from '@salto-io/adapter-api'
-import { config as configUtils, deployment, client as clientUtils } from '@salto-io/adapter-components'
+import {
+  config as configUtils,
+  deployment,
+  client as clientUtils,
+  createChangeElementResolver,
+  definitions as definitionUtils,
+} from '@salto-io/adapter-components'
 import { logger } from '@salto-io/logging'
 import { createSchemeGuard } from '@salto-io/adapter-utils'
 import {
@@ -48,14 +54,17 @@ import {
 import { API_DEFINITIONS_CONFIG, OktaSwaggerApiConfig } from '../config'
 import { FilterCreator } from '../filter'
 import {
-  deployChanges,
   defaultDeployChange,
+
   deployEdges,
-  deployStatusChange,
+  deployChange
   getOktaError,
   isActivationChange,
   isDeactivationChange,
 } from '../deployment'
+import { getLookUpName, OktaFieldReferenceResolver } from '../reference_mapping'
+import { AdditionalAction, OktaOptions } from '../definitions/types'
+import { DeployChangeInput } from '@salto-io/adapter-components/dist/src/definitions/system/deploy/types'
 
 const log = logger(module)
 
@@ -130,11 +139,12 @@ export const isInactiveCustomAppChange = (change: ModificationChange<InstanceEle
   getChangeData(change).value[CUSTOM_NAME_FIELD] !== undefined
 
 const deployApp = async (
-  change: Change<InstanceElement>,
+  args: DeployChangeInput<AdditionalAction>,
   client: clientUtils.HTTPWriteClientInterface & clientUtils.HTTPReadClientInterface,
-  apiDefinitions: OktaSwaggerApiConfig,
+  definitions: definitionUtils.ApiDefinitions<OktaOptions>,
   subdomain?: string,
 ): Promise<void> => {
+  const { change } = args
   const fieldsToIgnore = [...Object.keys(APP_ASSIGNMENT_FIELDS), ...APPLICATION_FIELDS_TO_IGNORE]
 
   try {
@@ -145,7 +155,7 @@ const deployApp = async (
         isInactiveCustomAppChange(change))
     ) {
       log.debug(`Changing status to ${ACTIVE_STATUS}, for instance ${getChangeData(change).elemID.getFullName()}`)
-      await deployStatusChange(change, client, apiDefinitions, 'activate')
+      await deployChange({changeAndContext: args, definitions, action: 'activate'})
     }
 
     const response = await defaultDeployChange(
@@ -167,7 +177,7 @@ const deployApp = async (
         isInactiveCustomAppChange(change))
     ) {
       log.debug(`Changing status to ${INACTIVE_STATUS}, for instance ${getChangeData(change).elemID.getFullName()}`)
-      await deployStatusChange(change, client, apiDefinitions, 'deactivate')
+      await deployChange({changeAndContext: args, definitions, action: 'deactivate'})
     }
 
     if (isAdditionOrModificationChange(change)) {
@@ -184,7 +194,7 @@ const deployApp = async (
 /**
  * Application type is deployed separately to update application's configuration, status and application's policies
  */
-const filterCreator: FilterCreator = ({ elementSource, definitions, oldApiDefinitions }) => ({
+const filterCreator: FilterCreator = ({ elementSource, definitions, oldApiDefinitions, sharedContext }) => ({
   name: 'appDeploymentFilter',
   onFetch: async (elements: Element[]) => {
     const instances = elements.filter(isInstanceElement)
@@ -232,9 +242,23 @@ const filterCreator: FilterCreator = ({ elementSource, definitions, oldApiDefini
       change => isInstanceChange(change) && getChangeData(change).elemID.typeName === APPLICATION_TYPE_NAME,
     )
     const subdomain = await getSubdomainFromElementsSource(elementSource)
-    const deployResult = await deployChanges(relevantChanges.filter(isInstanceChange), async change =>
-      deployApp(change, client, oldApiDefinitions[API_DEFINITIONS_CONFIG], subdomain),
-    )
+    const { deploy, clients, ...otherDefs } = definitions
+    if (deploy === undefined) {
+      throw new Error('could not find deploy definitions')
+    }
+    if (clients === undefined) {
+      throw new Error('could not find deploy definitions')
+    }
+    const deployResult = await deployment.deployChanges({
+      definitions: {deploy, clients, ...otherDefs},
+      changes: relevantChanges.filter(isInstanceChange),
+      convertError: getOktaError,
+      changeResolver: createChangeElementResolver<Change<InstanceElement>>({ getLookUpName }),
+      deployChangeFunc: async args => deployApp(args, client, definitions, subdomain),
+      elementSource,
+      sharedContext,
+      changeGroup: { changes, groupID: 'app' },
+  })
 
     return {
       leftoverChanges,

@@ -16,7 +16,7 @@
 
 import { definitions, deployment } from '@salto-io/adapter-components'
 import { AdditionalAction, ClientOptions } from './types'
-import { GROUP_TYPE_NAME } from '../constants'
+import { APPLICATION_TYPE_NAME, GROUP_TYPE_NAME } from '../constants'
 
 type InstanceDeployApiDefinitions = definitions.deploy.InstanceDeployApiDefinitions<AdditionalAction, ClientOptions>
 export type DeployApiDefinitions = definitions.deploy.DeployApiDefinitions<AdditionalAction, ClientOptions>
@@ -57,6 +57,74 @@ const createCustomizations = (): Record<string, InstanceDeployApiDefinitions> =>
               },
               context: {
                 groupId: '{id}',
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  [APPLICATION_TYPE_NAME]: {
+    requestsByAction: {
+      customizations: {
+        add: [
+          {
+            request: {
+              endpoint: {
+                path: '/api/v1/apps',
+                method: 'post',
+              },
+            },
+          },
+        ],
+        modify: [
+          {
+            request: {
+              endpoint: {
+                path: '/api/v1/apps/{applicationId}',
+                method: 'put',
+              },
+              context: {
+                applicationId: '{id}',
+              },
+            },
+          },
+        ],
+        remove: [
+          {
+            request: {
+              endpoint: {
+                path: '/api/v1/apps/{applicationId}',
+                method: 'delete',
+              },
+              context: {
+                applicationId: '{id}',
+              },
+            },
+          },
+        ],
+        activate: [
+          {
+            request: {
+              endpoint: {
+                path: '/api/v1/apps/{applicationId}/lifecycle/activate',
+                method: 'post',
+              },
+              context: {
+                applicationId: '{id}',
+              },
+            },
+          },
+        ],
+        deactivate: [
+          {
+            request: {
+              endpoint: {
+                path: '/api/v1/apps/{applicationId}/lifecycle/deactivate',
+                method: 'post',
+              },
+              context: {
+                applicationId: '{id}',
               },
             },
           },

@@ -39,19 +39,24 @@ import {
   elements as elementUtils,
   client as clientUtils,
   fetch as fetchUtils,
+  definitions as definitionUtils, createChangeElementResolver,
 } from '@salto-io/adapter-components'
 import { createSchemeGuard } from '@salto-io/adapter-utils'
 import { logger } from '@salto-io/logging'
 import { values, collections, promises } from '@salto-io/lowerdash'
 import { ACTIVE_STATUS, INACTIVE_STATUS, NETWORK_ZONE_TYPE_NAME } from './constants'
 import { OktaSwaggerApiConfig } from './config'
-import { StatusActionName } from './definitions/types'
+import { AdditionalAction, OktaOptions, StatusActionName } from './definitions/types'
+import { getLookUpName } from './reference_mapping'
+import { DeployChangeInput } from '@salto-io/adapter-components/dist/src/definitions/system/deploy/types'
+import { ActionName } from '@salto-io/dag'
 
 const log = logger(module)
 
 const { createUrl } = fetchUtils.resource
 const { awu } = collections.asynciterable
 const { isDefined } = values
+const { createSingleChangeDeployer } = deployment
 
 const isStringArray = (value: unknown): value is string[] => _.isArray(value) && value.every(_.isString)
 
@@ -146,6 +151,32 @@ export const deployStatusChange = async (
     throw err
   }
 }
+
+export const deployChange = async (
+  { changeAndContext, definitions, action }:
+    {
+      changeAndContext: definitionUtils.deploy.ChangeAndContext
+      definitions: definitionUtils.ApiDefinitions<OktaOptions>,
+      action: ActionName | AdditionalAction,
+    }): Promise<void> => {
+  const { change } = changeAndContext
+  const { deploy, clients, ...otherDefs } = definitions
+  if (deploy === undefined || clients === undefined) {
+    return
+  }
+  const deployer = createSingleChangeDeployer({
+    definitions: { deploy, clients, ...otherDefs },
+    convertError: getOktaError,
+    changeResolver: createChangeElementResolver<Change<InstanceElement>>({ getLookUpName }),
+  })
+  try {
+    await deployer({ action, ...changeAndContext })
+  } catch (err) {
+    log.error(`Status could not be updated in instance: ${getChangeData(change).elemID.getFullName()}`, err)
+    throw err
+  }
+}
+
 
 export const assignServiceIdToAdditionChange = async (
   response: deployment.ResponseResult,
