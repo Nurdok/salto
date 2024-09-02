@@ -354,8 +354,8 @@ export const getNamespace = async (element: Element): Promise<string | undefined
     : getNamespaceFromString(elementApiName)
 }
 
-export const extractFullNamesFromValueList = (instanceValues: { [INSTANCE_FULL_NAME_FIELD]: string }[]): string[] =>
-  instanceValues.map(v => v[INSTANCE_FULL_NAME_FIELD])
+export const extractFullNamesFromValueList = (instanceValues: Record<string, { [INSTANCE_FULL_NAME_FIELD]: string }>): string[] =>
+  Object.values(instanceValues).map(v => v[INSTANCE_FULL_NAME_FIELD])
 
 export const buildAnnotationsObjectType = (annotationTypes: TypeMap): ObjectType => {
   const annotationTypesElemID = new ElemID(SALESFORCE, 'AnnotationType')

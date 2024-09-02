@@ -19,9 +19,9 @@ import {
   getAllChangeData,
   isObjectTypeChange,
   isFieldChange,
-  Change,
+  Change, Values, Value, MapType,
 } from '@salto-io/adapter-api'
-import { buildElementsSourceFromElements } from '@salto-io/adapter-utils'
+import { buildElementsSourceFromElements, naclCase } from '@salto-io/adapter-utils'
 import { collections, types } from '@salto-io/lowerdash'
 
 import { FilterResult, RemoteFilterCreator } from '../filter'
@@ -32,7 +32,6 @@ import { ConfigChangeSuggestion } from '../types'
 import { fetchMetadataInstances } from '../fetch'
 
 const { awu } = collections.asynciterable
-const { makeArray } = collections.array
 
 export const STANDARD_VALUE_SET = 'StandardValueSet'
 export const STANDARD_VALUE = 'standardValue'
@@ -113,10 +112,7 @@ const svsValuesToRef = (svsInstances: InstanceElement[]): StandardValueSetsLooku
   _.fromPairs(
     svsInstances
       .filter(i => i.value[STANDARD_VALUE])
-      .map(i => {
-        const standardValue = makeArray(i.value[STANDARD_VALUE])
-        return [encodeValues(extractFullNamesFromValueList(standardValue)), new ReferenceExpression(i.elemID)]
-      }),
+      .map(i => [encodeValues(extractFullNamesFromValueList(i.value[STANDARD_VALUE])), new ReferenceExpression(i.elemID)]),
   )
 
 const isStandardPickList = (field: Field): boolean => {
@@ -217,6 +213,23 @@ export const makeFilter =
             metadataType: svsMetadataType,
             metadataQuery: config.fetchProfile.metadataQuery,
             maxInstancesPerType: config.fetchProfile.maxInstancesPerType,
+          })
+          svsInstances.elements.forEach(svsInstance => {
+            const valueMap: Values = {}
+            if (svsInstance.value.standardValue === undefined) {
+              return
+            }
+            if (!Array.isArray(svsInstance.value.standardValue)) {
+              svsInstance.value.standardValue = [svsInstance.value.standardValue]
+            }
+            svsInstance.value.standardValue.forEach((standardValue: Value) => {
+              valueMap[naclCase(standardValue.fullName)] = standardValue
+            })
+            svsInstance.value.standardValue = valueMap
+            if (svsInstance.refType.type?.fields?.standardValue?.refType?.type !== undefined) {
+              svsInstance.refType.type.fields.standardValue.refType.type = new MapType(
+                svsInstance.refType.type.fields.standardValue.refType?.type)
+            }
           })
           elements.push(...svsInstances.elements)
 

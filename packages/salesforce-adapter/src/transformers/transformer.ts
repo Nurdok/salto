@@ -219,6 +219,23 @@ const createPicklistValuesAnnotations = (picklistValues: PicklistEntry[]): Value
     [CUSTOM_VALUE.IS_ACTIVE]: val.active,
   }))
 
+/*
+const createPicklistValuesAnnotations = (picklistValues: PicklistEntry[]): Values => {
+  const picklistMap: Values = {}
+  picklistValues.forEach(val => {
+      picklistMap[val.value] = {
+        [CUSTOM_VALUE.FULL_NAME]: val.value,
+        [CUSTOM_VALUE.DEFAULT]: val.defaultValue,
+        [CUSTOM_VALUE.LABEL]: val.label || val.value,
+        [CUSTOM_VALUE.IS_ACTIVE]: val.active,
+      }
+    },
+  )
+  return picklistMap
+}
+
+ */
+
 const addPicklistAnnotations = (picklistValues: PicklistEntry[], restricted: boolean, annotations: Values): void => {
   if (picklistValues && picklistValues.length > 0) {
     annotations[FIELD_ANNOTATIONS.VALUE_SET] = createPicklistValuesAnnotations(picklistValues)
@@ -376,6 +393,7 @@ export class Types {
 
   private static valueSetElemID = new ElemID(SALESFORCE, FIELD_ANNOTATIONS.VALUE_SET)
 
+  // MARKER
   public static valueSetType = new ObjectType({
     elemID: Types.valueSetElemID,
     fields: {
@@ -620,6 +638,7 @@ export class Types {
         [DEFAULT_VALUE_FORMULA]: BuiltinTypes.STRING,
       },
     }),
+    // MARKER
     Picklist: new PrimitiveType({
       elemID: new ElemID(SALESFORCE, FIELD_TYPE_NAMES.PICKLIST),
       primitive: PrimitiveTypes.STRING,
@@ -938,18 +957,18 @@ export class Types {
   static getKnownType(name: string, customObject = true): TypeElement {
     return customObject
       ? this.primitiveDataTypes[name as FIELD_TYPE_NAMES] ||
-          this.compoundDataTypes[name as COMPOUND_FIELD_TYPE_NAMES] ||
-          this.formulaDataTypes[name as FIELD_TYPE_NAMES]
+      this.compoundDataTypes[name as COMPOUND_FIELD_TYPE_NAMES] ||
+      this.formulaDataTypes[name as FIELD_TYPE_NAMES]
       : this.metadataPrimitiveTypes[name.toLowerCase()]
   }
 
   static get({
-    name,
-    customObject = true,
-    isSettings = false,
-    serviceIds,
-    metaType,
-  }: {
+               name,
+               customObject = true,
+               isSettings = false,
+               serviceIds,
+               metaType,
+             }: {
     name: string
     customObject?: boolean
     isSettings?: boolean
@@ -1332,6 +1351,7 @@ export const getSObjectFieldElement = (
     // encrypted string
     naclFieldType = getFieldType(FIELD_TYPE_NAMES.ENCRYPTEDTEXT)
   }
+  // MARKER
   // Picklists
   if (field.picklistValues && field.picklistValues.length > 0) {
     addPicklistAnnotations(field.picklistValues, Boolean(field.restrictedPicklist), annotations)
@@ -1373,7 +1393,7 @@ export const getSObjectFieldElement = (
     if (objCompoundFieldNames[field.name] !== undefined) {
       naclFieldType = field.nameField
         ? // objCompoundFieldNames[field.name] is either 'Name' or 'Name2'
-          Types.compoundDataTypes[objCompoundFieldNames[field.name] as COMPOUND_FIELD_TYPE_NAMES]
+        Types.compoundDataTypes[objCompoundFieldNames[field.name] as COMPOUND_FIELD_TYPE_NAMES]
         : Types.compoundDataTypes[COMPOUND_FIELDS_SOAP_TYPE_NAMES[field.type]]
     }
   }
@@ -1611,17 +1631,17 @@ type CreateMetadataTypeParams = {
   metaType?: ObjectType
 }
 export const createMetadataTypeElements = async ({
-  name,
-  fields,
-  knownTypes = new Map(),
-  baseTypeNames,
-  childTypeNames,
-  client,
-  isSettings = false,
-  annotations = {},
-  missingFields = defaultMissingFields(),
-  metaType,
-}: CreateMetadataTypeParams): Promise<MetadataObjectType[]> => {
+                                                   name,
+                                                   fields,
+                                                   knownTypes = new Map(),
+                                                   baseTypeNames,
+                                                   childTypeNames,
+                                                   client,
+                                                   isSettings = false,
+                                                   annotations = {},
+                                                   missingFields = defaultMissingFields(),
+                                                   metaType,
+                                                 }: CreateMetadataTypeParams): Promise<MetadataObjectType[]> => {
   if (knownTypes.has(name)) {
     // Already created this type, no new types to return here
     return []
