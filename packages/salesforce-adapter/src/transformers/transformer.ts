@@ -211,6 +211,7 @@ export const fieldTypeName = (typeName: string): string | undefined => {
   return typeName
 }
 
+/*
 const createPicklistValuesAnnotations = (picklistValues: PicklistEntry[]): Values =>
   picklistValues.map(val => ({
     [CUSTOM_VALUE.FULL_NAME]: val.value,
@@ -219,7 +220,8 @@ const createPicklistValuesAnnotations = (picklistValues: PicklistEntry[]): Value
     [CUSTOM_VALUE.IS_ACTIVE]: val.active,
   }))
 
-/*
+ */
+
 const createPicklistValuesAnnotations = (picklistValues: PicklistEntry[]): Values => {
   const picklistMap: Values = {}
   picklistValues.forEach(val => {
@@ -234,7 +236,6 @@ const createPicklistValuesAnnotations = (picklistValues: PicklistEntry[]): Value
   return picklistMap
 }
 
- */
 
 const addPicklistAnnotations = (picklistValues: PicklistEntry[], restricted: boolean, annotations: Values): void => {
   if (picklistValues && picklistValues.length > 0) {

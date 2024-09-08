@@ -102,6 +102,8 @@ type ReferenceSerializationStrategyName =
   | 'mapKey'
   | 'customLabel'
   | 'fromDataInstance'
+  | 'picklistValueMapping'
+
 const ReferenceSerializationStrategyLookup: Record<ReferenceSerializationStrategyName, ReferenceSerializationStrategy> =
   {
     absoluteApiName: {
@@ -152,6 +154,13 @@ const ReferenceSerializationStrategyLookup: Record<ReferenceSerializationStrateg
           : ReferenceSerializationStrategyLookup.absoluteApiName.serialize(args),
       lookup: val => val,
     },
+    picklistValueMapping: {
+      serialize: async ({ ref }) =>
+        ref.value,
+      lookup: (val, context) => {
+        return `${context}.${val}`
+      }
+    }
   }
 
 export type ReferenceContextStrategyName =
@@ -175,6 +184,7 @@ export type ReferenceContextStrategyName =
   | 'neighborAssignedToTypeLookup'
   | 'neighborRelatedEntityTypeLookup'
   | 'parentSObjectTypeLookupTopLevel'
+  | 'picklistValueLookup'
 
 type SourceDef = {
   field: string | RegExp
@@ -625,6 +635,14 @@ export const fieldNameToTypeMappingDefs: FieldReferenceDefinition[] = [
     src: { field: 'picklist', parentTypes: ['RecordTypePicklistValue'] },
     serializationStrategy: 'relativeApiName',
     target: { parentContext: 'instanceParent', type: CUSTOM_FIELD },
+  },
+  {
+    src: {field: 'values', parentTypes: ['RecordTypePicklistValue']},
+    serializationStrategy: 'picklistValueMapping',
+    target: {
+      parentContext: 'picklistValueLookup',
+      type: CUSTOM_FIELD
+    }
   },
   {
     src: { field: 'page', parentTypes: ['WebLink'] },
