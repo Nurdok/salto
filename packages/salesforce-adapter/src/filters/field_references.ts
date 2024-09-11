@@ -148,9 +148,6 @@ const contextStrategyLookup: Record<ReferenceContextStrategyName, referenceUtils
     contextFieldName: 'SObjectType',
     levelsUp: 'top',
   }),
-  picklistValueLookup: neighborContextFunc({
-    contextFieldName: 'picklist',
-  }),
 }
 
 export const addReferences = async (

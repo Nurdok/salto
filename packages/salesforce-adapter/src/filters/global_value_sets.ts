@@ -12,15 +12,12 @@ import {
   ReferenceExpression,
   ElemID,
   isObjectType,
-  Values,
-  Value, MapType,
 } from '@salto-io/adapter-api'
 import { multiIndex } from '@salto-io/lowerdash'
 import { LocalFilterCreator } from '../filter'
 import { VALUE_SET_FIELDS } from '../constants'
-import { isCustomObject, apiName } from '../transformers/transformer'
-import { isInstanceOfType, buildElementsSourceForFetch, isInstanceOfTypeSync } from './utils'
-import { naclCase } from '@salto-io/adapter-utils'
+import { apiName, isCustomObject } from '../transformers/transformer'
+import { buildElementsSourceForFetch, isInstanceOfTypeSync } from './utils'
 
 export const GLOBAL_VALUE_SET = 'GlobalValueSet'
 export const CUSTOM_VALUE = 'customValue'
@@ -50,6 +47,7 @@ const filterCreator: LocalFilterCreator = ({ config }) => ({
    * @param elements the already fetched elements
    */
   onFetch: async (elements: Element[]): Promise<void> => {
+    /*
     elements.filter(isInstanceOfTypeSync(GLOBAL_VALUE_SET)).forEach(gvsInstance => {
         const valueMap: Values = {}
         if (gvsInstance.value.customValue === undefined) {
@@ -67,10 +65,12 @@ const filterCreator: LocalFilterCreator = ({ config }) => ({
             gvsInstance.refType.type.fields.customValue.refType?.type)
         }
     })
+
+     */
     const referenceElements = buildElementsSourceForFetch(elements, config)
     const valueSetNameToRef = await multiIndex.keyByAsync({
       iter: await referenceElements.getAll(),
-      filter: isInstanceOfType(GLOBAL_VALUE_SET),
+      filter: isInstanceOfTypeSync(GLOBAL_VALUE_SET),
       key: async inst => [await apiName(inst)],
       map: inst => inst.elemID,
     })

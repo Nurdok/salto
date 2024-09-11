@@ -19,9 +19,9 @@ import {
   getAllChangeData,
   isObjectTypeChange,
   isFieldChange,
-  Change, Values, Value, MapType,
+  Change
 } from '@salto-io/adapter-api'
-import { buildElementsSourceFromElements, naclCase } from '@salto-io/adapter-utils'
+import { buildElementsSourceFromElements} from '@salto-io/adapter-utils'
 import { collections, types } from '@salto-io/lowerdash'
 
 import { FilterResult, RemoteFilterCreator } from '../filter'
@@ -214,6 +214,7 @@ export const makeFilter =
             metadataQuery: config.fetchProfile.metadataQuery,
             maxInstancesPerType: config.fetchProfile.maxInstancesPerType,
           })
+          /*
           svsInstances.elements.forEach(svsInstance => {
             const valueMap: Values = {}
             if (svsInstance.value.standardValue === undefined) {
@@ -231,6 +232,8 @@ export const makeFilter =
                 svsInstance.refType.type.fields.standardValue.refType?.type)
             }
           })
+
+           */
           elements.push(...svsInstances.elements)
 
           configChanges = svsInstances.configChanges

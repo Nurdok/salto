@@ -108,6 +108,7 @@ import generatedDependenciesFilter from './filters/generated_dependencies'
 import { CUSTOM_REFS_CONFIG, FetchElements, FetchProfile, MetadataQuery, SalesforceConfig } from './types'
 import mergeProfilesWithSourceValuesFilter from './filters/merge_profiles_with_source_values'
 import flowCoordinatesFilter from './filters/flow_coordinates'
+import picklistsFilter from './filters/picklists'
 import { getConfigFromConfigChanges } from './config_change'
 import {
   LocalFilterCreator,
@@ -203,9 +204,10 @@ export const allFilters: Array<LocalFilterCreatorDefinition | RemoteFilterCreato
   { creator: profilePermissionsFilter },
   // emailTemplateFilter should run before convertMapsFilter
   { creator: emailTemplateFilter },
+  // standardValueSetFilter should run before convertMapsFilter
+  { creator: standardValueSetFilter, addsNewInformation: true },
   // convertMapsFilter should run before profile fieldReferencesFilter
   { creator: convertMapsFilter },
-  { creator: standardValueSetFilter, addsNewInformation: true },
   { creator: flowFilter },
   { creator: customObjectInstanceReferencesFilter, addsNewInformation: true },
   { creator: cpqReferencableFieldReferencesFilter },
@@ -262,6 +264,7 @@ export const allFilters: Array<LocalFilterCreatorDefinition | RemoteFilterCreato
   { creator: hideTypesFolder },
   { creator: generatedDependenciesFilter },
   { creator: flowCoordinatesFilter },
+  { creator: picklistsFilter },
   // createChangedAtSingletonInstanceFilter should run last
   { creator: changedAtSingletonFilter },
 ]

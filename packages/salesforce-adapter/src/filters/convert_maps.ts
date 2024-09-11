@@ -45,6 +45,8 @@ import {
   INSTANCE_FULL_NAME_FIELD,
 } from '../constants'
 import { metadataType } from '../transformers/transformer'
+import { GLOBAL_VALUE_SET } from './global_value_sets'
+import { STANDARD_VALUE_SET } from './standard_value_sets'
 
 const { awu } = collections.asynciterable
 const { isDefined } = lowerdashValues
@@ -136,6 +138,17 @@ const SHARING_RULES_MAP_FIELD_DEF: Record<string, MapDef> = {
   sharingOwnerRules: { key: INSTANCE_FULL_NAME_FIELD },
 }
 
+/*
+const GLOBAL_VALUE_SET_MAP_FIELD_DEF: Record<string, MapDef> = {
+  customValue: { key: 'fullName' },
+}
+
+const STANDARD_VALUE_SET_MAP_FIELD_DEF: Record<string, MapDef> = {
+  standardValue: { key: 'fullName' },
+}
+
+ */
+
 export const metadataTypeToFieldToMapDef: Record<string, Record<string, MapDef>> = {
   [BUSINESS_HOURS_METADATA_TYPE]: BUSINESS_HOURS_MAP_FIELD_DEF,
   [EMAIL_TEMPLATE_METADATA_TYPE]: EMAIL_TEMPLATE_MAP_FIELD_DEF,
@@ -144,6 +157,8 @@ export const metadataTypeToFieldToMapDef: Record<string, Record<string, MapDef>>
   [MUTING_PERMISSION_SET_METADATA_TYPE]: PERMISSIONS_SET_MAP_FIELD_DEF,
   [LIGHTNING_COMPONENT_BUNDLE_METADATA_TYPE]: LIGHTNING_COMPONENT_BUNDLE_MAP,
   [SHARING_RULES_TYPE]: SHARING_RULES_MAP_FIELD_DEF,
+  [GLOBAL_VALUE_SET]: {},  // GLOBAL_VALUE_SET_MAP_FIELD_DEF,
+  [STANDARD_VALUE_SET]: {},  // STANDARD_VALUE_SET_MAP_FIELD_DEF,
 }
 
 /**
