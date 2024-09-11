@@ -138,7 +138,6 @@ const SHARING_RULES_MAP_FIELD_DEF: Record<string, MapDef> = {
   sharingOwnerRules: { key: INSTANCE_FULL_NAME_FIELD },
 }
 
-/*
 const GLOBAL_VALUE_SET_MAP_FIELD_DEF: Record<string, MapDef> = {
   customValue: { key: 'fullName' },
 }
@@ -146,8 +145,6 @@ const GLOBAL_VALUE_SET_MAP_FIELD_DEF: Record<string, MapDef> = {
 const STANDARD_VALUE_SET_MAP_FIELD_DEF: Record<string, MapDef> = {
   standardValue: { key: 'fullName' },
 }
-
- */
 
 export const metadataTypeToFieldToMapDef: Record<string, Record<string, MapDef>> = {
   [BUSINESS_HOURS_METADATA_TYPE]: BUSINESS_HOURS_MAP_FIELD_DEF,
@@ -157,8 +154,8 @@ export const metadataTypeToFieldToMapDef: Record<string, Record<string, MapDef>>
   [MUTING_PERMISSION_SET_METADATA_TYPE]: PERMISSIONS_SET_MAP_FIELD_DEF,
   [LIGHTNING_COMPONENT_BUNDLE_METADATA_TYPE]: LIGHTNING_COMPONENT_BUNDLE_MAP,
   [SHARING_RULES_TYPE]: SHARING_RULES_MAP_FIELD_DEF,
-  [GLOBAL_VALUE_SET]: {},  // GLOBAL_VALUE_SET_MAP_FIELD_DEF,
-  [STANDARD_VALUE_SET]: {},  // STANDARD_VALUE_SET_MAP_FIELD_DEF,
+  [GLOBAL_VALUE_SET]: GLOBAL_VALUE_SET_MAP_FIELD_DEF,
+  [STANDARD_VALUE_SET]: STANDARD_VALUE_SET_MAP_FIELD_DEF,
 }
 
 /**

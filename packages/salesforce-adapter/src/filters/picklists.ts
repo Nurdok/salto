@@ -8,6 +8,8 @@
 import { isInstanceElement, ReferenceExpression } from '@salto-io/adapter-api'
 import { naclCase } from '@salto-io/adapter-utils'
 import { LocalFilterCreator } from '../filter'
+import { GLOBAL_VALUE_SET } from './global_value_sets'
+import { STANDARD_VALUE_SET } from './standard_value_sets'
 
 /**
   * This filter remodels picklists to allow references to their values, and adds such references to referencing fields.
@@ -16,17 +18,16 @@ import { LocalFilterCreator } from '../filter'
 const filterCreator: LocalFilterCreator = () => ({
   name: 'picklists',
   onFetch: async elements => {
-    return
     // Find record types with picklist fields and convert them to reference expressions
     const recordTypes = elements.filter(isInstanceElement).filter(objectType => objectType.elemID.typeName === 'RecordType')
     const picklistValuesItem = recordTypes.flatMap(rt => rt.value.picklistValues)
     picklistValuesItem.forEach(picklistValues => {
-      const picklistRef: ReferenceExpression = picklistValues.picklist
+      const picklistRef: ReferenceExpression = picklistValues.picklist.value.annotations.valueSetName ?? picklistValues.picklist
       picklistValues.values = picklistValues.values.map((value: { fullName: string | undefined }) => {
-        if (picklistRef.elemID.typeName === 'GlobalValueSet') {
+        if (picklistRef.elemID.typeName === GLOBAL_VALUE_SET) {
           return new ReferenceExpression(picklistRef.elemID.createNestedID('customValue', naclCase(value.fullName)))
         }
-        if (picklistRef.elemID.typeName === 'StandardValueSet') {
+        if (picklistRef.elemID.typeName === STANDARD_VALUE_SET) {
           return new ReferenceExpression(picklistRef.elemID.createNestedID('standardValue', naclCase(value.fullName)))
         }
         return new ReferenceExpression(picklistRef.elemID.createNestedID('valueSet', naclCase(value.fullName)))
