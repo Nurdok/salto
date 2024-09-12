@@ -24,13 +24,17 @@ const filterCreator: LocalFilterCreator = () => ({
     picklistValuesItem.forEach(picklistValues => {
       const picklistRef: ReferenceExpression = picklistValues.picklist.value.annotations.valueSetName ?? picklistValues.picklist
       picklistValues.values = picklistValues.values.map((value: { fullName: string | undefined }) => {
+        if (value.fullName === undefined) {
+          throw new Error('Failed to find value name')
+        }
+        const valueName = naclCase(decodeURIComponent(value.fullName))
         if (picklistRef.elemID.typeName === GLOBAL_VALUE_SET) {
-          return new ReferenceExpression(picklistRef.elemID.createNestedID('customValue', naclCase(value.fullName)))
+          return new ReferenceExpression(picklistRef.elemID.createNestedID('customValue', valueName))
         }
         if (picklistRef.elemID.typeName === STANDARD_VALUE_SET) {
-          return new ReferenceExpression(picklistRef.elemID.createNestedID('standardValue', naclCase(value.fullName)))
+          return new ReferenceExpression(picklistRef.elemID.createNestedID('standardValue', valueName))
         }
-        return new ReferenceExpression(picklistRef.elemID.createNestedID('valueSet', naclCase(value.fullName)))
+        return new ReferenceExpression(picklistRef.elemID.createNestedID('valueSet', valueName))
       })
     })
   }
